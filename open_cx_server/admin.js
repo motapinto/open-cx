@@ -9,7 +9,9 @@ const Participant = require('./models/participant');
 const Question = require('./models/question');
 const Speaker = require('./models/speaker');
 const Talk = require('./models/talk');
-
+const POI = require('./models/poi');
+const POIType = require('./models/poi_type');
+const FriendRequest = require('./models/friend_request');
 
 AdminBro.registerAdapter(AdminBroMongoose)
 const adminBro = new AdminBro({
@@ -51,11 +53,34 @@ const adminBro = new AdminBro({
     },
     {
       resource: Talk,
+    },
+    {
+      resource: POI,
+    },
+    {
+      resource: POIType
+    },
+    {
+      resource: FriendRequest
     }
   ],
   branding: {
-    companyName: 'NeTinder',
+    companyName: 'Guideasy',
     softwareBrothers: false
+  },
+  actions: {
+    new: {
+      before: async (request) => {
+        if(request.payload.record.password) {
+          request.payload.record = {
+            ...request.payload.record,
+            encryptedPassword: await bcrypt.hash(request.payload.record.password, 10),
+            password: undefined,
+          }
+        }
+        return request
+      },
+    }
   }
 })
 
